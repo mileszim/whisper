@@ -33,7 +33,7 @@ class LayerNorm(nn.LayerNorm):
 
 class Linear(nn.Linear):
     def forward(self, x: Tensor) -> Tensor:
-        return F.linear(
+        return F.Linear(
             x, self.weight.to(x.dtype), None if self.bias is None else self.bias.to(x.dtype)
         )
 
@@ -58,10 +58,10 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, n_state: int, n_head: int):
         super().__init__()
         self.n_head = n_head
-        self.query = Linear(n_state, n_state)
-        self.key = Linear(n_state, n_state, bias=False)
-        self.value = Linear(n_state, n_state)
-        self.out = Linear(n_state, n_state)
+        self.query = nn.Linear(n_state, n_state)
+        self.key = nn.Linear(n_state, n_state, bias=False)
+        self.value = nn.Linear(n_state, n_state)
+        self.out = nn.Linear(n_state, n_state)
 
     def forward(
         self,
@@ -112,7 +112,7 @@ class ResidualAttentionBlock(nn.Module):
         self.cross_attn_ln = LayerNorm(n_state) if cross_attention else None
 
         n_mlp = n_state * 4
-        self.mlp = nn.Sequential(Linear(n_state, n_mlp), nn.GELU(), Linear(n_mlp, n_state))
+        self.mlp = nn.Sequential(nn.Linear(n_state, n_mlp), nn.GELU(), nn.Linear(n_mlp, n_state))
         self.mlp_ln = LayerNorm(n_state)
 
     def forward(
